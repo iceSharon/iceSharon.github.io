@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫雷游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5e3e6; /* 浅粉色背景 */
+            margin: 0;
+            padding: 0;
+            text-align: center; /* 文本居中 */
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* 白色容器 */
+            border: 1px solid #dcdcdc; /* 淡紫色边框 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 淡紫色阴影 */
+        }
+        .cell.revealed.gray-cell {
+            background-color: gray !important; /* 灰色背景 */
+        }
+        h1 {
+            color: #333; /* 深灰色标题 */
+        }
+        .minesweeper {
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .row {
+            white-space: nowrap;
+        }
+        .cell {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #dcdcdc; /* 淡紫色边框 */
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 14px;
+            cursor: pointer;
+            position: relative;
+        }
+        .mine {
+            background-color: #933c8a; /* 深紫色背景 */
+            color: transparent;
+        }
+        .revealed {
+            background-color: #fff; /* 白色背景 */
+            border: 1px solid #dcdcdc; /* 淡紫色边框 */
+            cursor: default;
+        }
+        .flagged {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff; /* 白色背景 */
+            border: 1px solid #dcdcdc; /* 淡紫色边框 */
+            cursor: default;
+        }
+        .flag {
+            width: 18px;
+            height: 18px;
+            background-color: #933c8a; /* 深紫色背景 */
+            border-radius: 50%;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #933c8a; /* 深紫色按钮背景 */
+            color: #fff; /* 白色按钮文本 */
+            border: none;
+            border-radius: 10px; /* 圆角矩形边框 */
+            text-decoration: none;
+            margin-top: 20px; /* 按钮上方留白 */
+        }
+        .color-area {
+            background-color: #f7c5db; /* 浅紫色区域背景 */
+            padding: 10px; /* 区域内边距 */
+            margin-top: 20px; /* 区域上方留白 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 淡紫色阴影 */
+        }
+        .color-area2 {
+            background-color: #afe1e7; /* 淡蓝色区域背景 */
+            padding: 10px; /* 区域内边距 */
+            margin-top: 20px; /* 区域上方留白 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 淡紫色阴影 */
+        }
+        .color-area3 {
+            background-color: #f8e6a8; /* 淡黄色区域背景 */
+            padding: 10px; /* 区域内边距 */
+            margin-top: 20px; /* 区域上方留白 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 淡紫色阴影 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>扫雷游戏</h1>
+        <div class="minesweeper"></div>
+        <div class="buttons">
+            <button onclick="toggleMode()" class="button">翻开模式</button>
+            <button onclick="resetGame()" class="button">重新开始</button>
+            <button onclick="clearFlags()" class="button">清除标记</button>
+        </div>
+        <div class="color-area">
+            <h2>游戏说明：</h2>
+            <p>这是一个扫雷游戏，你的目标是揭示所有没有地雷的格子，而不触发地雷。</p>
+            <p>按钮说明：</p>
+            <ul>
+                <li>翻开模式：点击格子以揭示其内容。</li>
+                <li>重新开始：重新开始游戏。</li>
+                <li>清除标记：清除所有标记在格子上的标记。</li>
+            </ul>
+            <p>右键点击格子可以标记或取消标记格子。</p>
+            <p>游戏结束时，点击“重新开始”按钮以重新开始游戏。</p>
+        </div>
+        <a href="../index.html" class="button">返回目录</a>
+    </div>
+    <script>
+        const numRows = 8;
+        const numCols = 8;
+        const numMines = 10;
+
+        let board = [];
+        let minesVisible = false;
+        let revealMode = true;
+
+        function initializeBoard() {
+            board = [];
+            for (let row = 0; row < numRows; row++) {
+                const rowArray = [];
+                for (let col = 0; col < numCols; col++) {
+                    rowArray.push({ isMine: false, isRevealed: false, isFlagged: false });
+                }
+                board.push(rowArray);
+            }
+
+            placeMines();
+        }
+
+        function placeMines() {
+            let minesPlaced = 0;
+            while (minesPlaced < numMines) {
+                const row = Math.floor(Math.random() * numRows);
+                const col = Math.floor(Math.random() * numCols);
+
+                if (!board[row][col].isMine) {
+                    board[row][col].isMine = true;
+                    minesPlaced++;
+                }
+            }
+        }
+
+        function toggleMode() {
+            revealMode = !revealMode;
+            const modeButton = document.querySelector('button');
+            modeButton.textContent = revealMode ? '翻开模式' : '标记模式';
+            renderBoard();
+        }
+
+        function revealCell(row, col) {
+            if (board[row][col].isRevealed || (board[row][col].isFlagged && !revealMode)) return;
+
+            if (revealMode) {
+                board[row][col].isRevealed = true;
+
+                if (board[row][col].isMine) {
+                    alert('游戏结束！你踩到了地雷！');
+                    resetGame();
+                } else {
+                    const adjacentMines = countAdjacentMines(row, col);
+                    if (adjacentMines === 0) {
+                        revealAdjacentCells(row, col);
+                    }
+                }
+            } else {
+                board[row][col].isFlagged = !board[row][col].isFlagged;
+            }
+
+            if (checkVictory()) {
+                alert('恭喜你，你赢了！');
+                resetGame();
+            }
+
+            renderBoard();
+        }
+
+        function countAdjacentMines(row, col) {
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    const newRow = row + i;
+                    const newCol = col + j;
+                    if (newRow >= 0 && newRow < numRows && newCol >= 0 && newCol < numCols) {
+                        if (board[newRow][newCol].isMine) {
+                            count++;
+                        }
+                    }
+                }
+            }
+            return count;
+        }
+
+        function revealAdjacentCells(row, col) {
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    const newRow = row + i;
+                    const newCol = col + j;
+                    if (newRow >= 0 && newRow < numRows && newCol >= 0 && newCol < numCols) {
+                        revealCell(newRow, newCol);
+                    }
+                }
+            }
+        }
+
+        function clearFlags() {
+            if (!revealMode) {
+                for (let row = 0; row < numRows; row++) {
+                    for (let col = 0; col < numCols; col++) {
+                        board[row][col].isFlagged = false;
+                    }
+                }
+                renderBoard();
+            }
+        }
+
+        function checkVictory() {
+            for (let row = 0; row < numRows; row++) {
+                for (let col = 0; col < numCols; col++) {
+                    if (!board[row][col].isMine && !board[row][col].isRevealed) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function resetGame() {
+            initializeBoard();
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const minesweeper = document.querySelector('.minesweeper');
+            minesweeper.innerHTML = '';
+
+            for (let row = 0; row < numRows; row++) {
+                const rowElement = document.createElement('div');
+                rowElement.classList.add('row');
+                for (let col = 0; col < numCols; col++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    if (board[row][col].isRevealed) {
+                        cell.classList.add('revealed', 'gray-cell');
+                        if (board[row][col].isMine && minesVisible) {
+                            cell.classList.add('mine');
+                        } else if (!board[row][col].isMine) {
+                            const adjacentMines = countAdjacentMines(row, col);
+                            if (adjacentMines > 0) {
+                                cell.textContent = adjacentMines;
+                            }
+                        }
+                    } else {
+                        if (board[row][col].isFlagged && !revealMode) {
+                            const flag = document.createElement('div');
+                            flag.classList.add('flag');
+                            cell.appendChild(flag);
+                        }
+                        cell.addEventListener('click', () => revealCell(row, col));
+                        cell.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            toggleFlag(row, col);
+                        });
+                    }
+                    rowElement.appendChild(cell);
+                }
+
+                minesweeper.appendChild(rowElement);
+            }
+        }
+
+        initializeBoard();
+        renderBoard();
+    </script>
+</body>
+</html>

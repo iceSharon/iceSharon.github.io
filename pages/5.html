@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>敲木鱼游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5e3e6; /* 背景颜色与UI一致 */
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+        h2 {
+            color: #933c8a;
+            margin-top: 20px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            color: #933c8a;
+            margin: 5px 0;
+        }
+        a {
+            text-decoration: none;
+            color: #933c8a;
+        }
+        .color-area {
+            background-color: #f7c5db;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .color-area2 {
+            background-color: #afe1e7;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .color-area3 {
+            background-color: #f8e6a8;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #933c8a;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        /* 添加样式以匹配UI */
+        #woodfish {
+            width: 200px;
+            height: 200px;
+            background-color: #71361d; /* 棕色背景 */
+            border-radius: 50%;
+            margin: 50px auto;
+            cursor: pointer;
+        }
+        #merit {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>敲木鱼游戏</h1>
+        <p>点击下面的木鱼：</p>
+        <div id="woodfish" onclick="playWoodfishSound(); increaseMerit()"></div>
+        <div id="merit">功德：0</div>
+
+        <audio id="woodfishSound">
+            <source src="woodfish_sound.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+
+        <script>
+            var meritValue = 0;
+
+            function playWoodfishSound() {
+                var woodfishSound = document.getElementById("woodfishSound");
+                woodfishSound.play();
+            }
+
+            function increaseMerit() {
+                meritValue++;
+                var meritText = document.getElementById("merit");
+                meritText.textContent = "功德：" + meritValue;
+            }
+        </script>
+        <a href="../index.html" class="button">返回目录</a>
+    </div>
+</body>
+</html>

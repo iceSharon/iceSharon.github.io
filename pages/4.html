@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>贪吃蛇游戏</title>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        #gameCanvas {
+            border: 1px solid black;
+            background-color: #f0f0f0;
+            margin: 0 auto;
+        }
+
+        #score {
+            font-size: 20px;
+            margin: 10px;
+        }
+
+        #restartButton {
+            display: none;
+            margin: 10px auto;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: green;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .center {
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #933c8a; /* 深紫色按钮背景 */
+            color: #fff; /* 白色按钮文本 */
+            border: none;
+            border-radius: 10px; /* 圆角矩形边框 */
+            text-decoration: none;
+            margin-top: 20px; /* 按钮上方留白 */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div id="score">得分：0</div>
+    <div class="center">
+        <button id="restartButton" onclick="resetGame()">重新开始</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const restartButton = document.getElementById('restartButton');
+        const gridSize = 20;
+        let snake = [{ x: 200, y: 200 }];
+        let food = { x: 300, y: 300 };
+        let velocity = { x: 0, y: 0 };
+        let score = 0;
+        let gameRunning = false;
+
+        function updateGame() {
+            if (!gameRunning) return;
+
+            const head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
+
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)) {
+                gameOver();
+                return;
+            }
+
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                score += 1;
+                scoreElement.innerText = '得分：' + score;
+                placeFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function drawGame() {
+            if (!gameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 绘制蛇的身体
+            ctx.fillStyle = 'green';
+            snake.slice(1).forEach(segment => ctx.fillRect(segment.x, segment.y, gridSize, gridSize));
+            // 绘制蛇的头部为圆形
+            let head = snake[0];
+            ctx.beginPath();
+            ctx.arc(head.x + gridSize / 2, head.y + gridSize / 2, gridSize / 2, 0, 2 * Math.PI);
+            ctx.fill();
+            // 绘制蛇头的眼睛
+            drawEyes(head);
+            // 绘制食物为圆形
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(food.x + gridSize / 2, food.y + gridSize / 2, gridSize / 2, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function drawEyes(head) {
+            ctx.fillStyle = 'white';
+            let eyeRadius = gridSize / 8;
+            let eye1x, eye1y, eye2x, eye2y;
+
+            // 根据蛇的移动方向调整眼睛位置
+            if (velocity.x === 0 && velocity.y === 0) {
+                // 初始情况，眼睛朝上
+                eye1x = head.x + gridSize * 1 / 4;
+                eye2x = head.x + gridSize * 3 / 4;
+                eye1y = eye2y = head.y + gridSize / 4;
+            } else if (velocity.x > 0) {
+                // 向右移动
+                eye1x = eye2x = head.x + gridSize * 3 / 4;
+                eye1y = head.y + gridSize / 4;
+                eye2y = head.y + gridSize * 3 / 4;
+            } else if (velocity.x < 0) {
+                // 向左移动
+                eye1x = eye2x = head.x + gridSize / 4;
+                eye1y = head.y + gridSize / 4;
+                eye2y = head.y + gridSize * 3 / 4;
+            } else if (velocity.y > 0) {
+                // 向下移动
+                eye1x = head.x + gridSize * 1 / 4;
+                eye2x = head.x + gridSize * 3 / 4;
+                eye1y = eye2y = head.y + gridSize * 3 / 4;
+            } else if (velocity.y < 0) {
+                // 向上移动
+                eye1x = head.x + gridSize * 1 / 4;
+                eye2x = head.x + gridSize * 3 / 4;
+                eye1y = eye2y = head.y + gridSize / 4;
+            }
+
+            ctx.beginPath();
+            ctx.arc(eye1x, eye1y, eyeRadius, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(eye2x, eye2y, eyeRadius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function placeFood() {
+            food = {
+                x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
+                y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize
+            };
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            restartButton.style.display = 'block';
+        }
+
+        function resetGame() {
+            snake = [{ x: 200, y: 200 }];
+            velocity = { x: 0, y: 0 };
+            score = 0;
+            scoreElement.innerText = '得分：0';
+            placeFood();
+            gameRunning = true;
+            restartButton.style.display = 'none';
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (!gameRunning) return;
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    if (velocity.x === 0) velocity = { x: -gridSize, y: 0 };
+                    break;
+                case 'ArrowRight':
+                    if (velocity.x === 0) velocity = { x: gridSize, y: 0 };
+                    break;
+                case 'ArrowUp':
+                    if (velocity.y === 0) velocity = { x: 0, y: -gridSize };
+                    break;
+                case 'ArrowDown':
+                    if (velocity.y === 0) velocity = { x: 0, y: gridSize };
+                    break;
+            }
+        });
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            updateGame();
+            drawGame();
+            setTimeout(gameLoop, 100);
+        }
+
+        resetGame();
+    </script>
+    <a href="../index.html" class="button">返回目录</a>
+</body>
+</html>
