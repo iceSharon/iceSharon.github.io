@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>石头剪刀布游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5e3e6;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #933c8a;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        .color-area {
+            background-color: #f7c5db;
+            padding: 10px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .color-area2 {
+            background-color: #afe1e7;
+            padding: 10px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .color-area3 {
+            background-color: #f8e6a8;
+            padding: 10px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>石头剪刀布游戏</h1>
+        <div class="color-area">
+            <h3>请选择：</h3>
+            <button class="button" onclick="playerChoice('石头')">石头</button>
+            <button class="button" onclick="playerChoice('剪刀')">剪刀</button>
+            <button class="button" onclick="playerChoice('布')">布</button>
+        </div>
+        <div class="color-area2">
+            <p id="result"></p>
+            <p id="restartMessage" style="display: none;"><strong>点击上面的选择按钮重新开始</strong></p>
+        </div>
+        <div class="color-area3">
+            <p>玩家得分：<span id="playerScore">0</span><br>程序得分：<span id="computerScore">0</span></p>
+        </div>
+        <script>
+            let playerScore = 0;
+            let computerScore = 0;
+
+            function playerChoice(player) {
+                const choices = ['石头', '剪刀', '布'];
+                const computer = choices[Math.floor(Math.random() * 3)];
+                const result = determineWinner(player, computer);
+                updateScore(result);
+                displayResult(player, computer, result);
+            }
+
+            function determineWinner(player, computer) {
+                if (player === computer) {
+                    return '平局';
+                } else if ((player === '石头' && computer === '剪刀') ||
+                        (player === '剪刀' && computer === '布') ||
+                        (player === '布' && computer === '石头')) {
+                    playerScore++;
+                    return '玩家获胜\n程序失败';
+                } else {
+                    computerScore++;
+                    return '玩家失败\n程序获胜';
+                }
+            }
+
+            function updateScore(result) {
+                const playerScoreElement = document.getElementById('playerScore');
+                const computerScoreElement = document.getElementById('computerScore');
+                playerScoreElement.innerHTML = playerScore;
+                computerScoreElement.innerHTML = computerScore;
+            }
+
+            function displayResult(player, computer, result) {
+                const resultElement = document.getElementById('result');
+                const restartMessageElement = document.getElementById('restartMessage');
+                resultElement.innerHTML = `你选择了：${player}\n程序选择了：${computer}。<br>${result}`;
+                restartMessageElement.style.display = 'block';
+            }
+        </script>
+    </div>
+</body>
+</html>
