@@ -6,7 +6,6 @@
         body {
             text-align: center;
         }
-
         #gameCanvas {
             border: 1px solid black;
             background-color: #f0f0f0;
@@ -17,7 +16,6 @@
             font-size: 20px;
             margin: 10px;
         }
-
         #restartButton {
             display: none;
             margin: 10px auto;
@@ -29,9 +27,63 @@
             font-size: 16px;
             cursor: pointer;
         }
-
         .center {
             text-align: center;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5e3e6; /* 浅粉色背景 */
+            margin: 0;
+            padding: 0;
+            text-align: center; /* 文本居中 */
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* 白色容器 */
+            border: 1px solid #dcdcdc; /* 淡紫色边框 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 淡紫色阴影 */
+        }
+        h1 {
+            color: #333; /* 深灰色标题 */
+        }
+        p {
+            line-height: 1.6;
+            color: #555; /* 中灰色文本 */
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0; /* 图片上下留白 */
+        }
+        ul {
+            list-style-type: disc; /* 使用实心圆点作为列表符号 */
+            padding-left: 20px; /* 左侧缩进，以显示列表符号 */
+            text-align: left; /* 文本左对齐 */
+        }
+        li {
+            line-height: 1.6;
+            color: #555; /* 中灰色文本 */
+        }
+        a {
+            text-decoration: none;
+            color: #933c8a; /* 深紫色链接文本 */
+        }
+        .color-area {
+            background-color: #f7c5db; /* 浅紫色区域背景 */
+            padding: 10px; /* 区域内边距 */
+            margin-top: 20px; /* 区域上方留白 */
+        }
+        .color-area2 {
+            background-color: #afe1e7; /* 淡蓝色区域背景 */
+            padding: 10px; /* 区域内边距 */
+            margin-top: 20px; /* 区域上方留白 */
+        }
+        .color-area3 {
+            background-color: #f8e6a8; /* 淡黄色区域背景 */
+            padding: 10px; /* 区域内边距 */
+            margin-top: 20px; /* 区域上方留白 */
         }
         .button {
             display: inline-block;
@@ -46,10 +98,20 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <div id="score">得分：0</div>
-    <div class="center">
-        <button id="restartButton" onclick="resetGame()">重新开始</button>
+    <div class="container">
+        <h1>贪吃蛇游戏</h1>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="score">得分：0</div>
+        <div class="center">
+            <button id="restartButton" onclick="resetGame()">重新开始</button>
+        </div>
+        <div>
+            <h2>游戏说明</h2>
+            <p>使用方向键控制蛇的移动，吃到红色的食物来增加分数。</p>
+            <p>游戏结束条件：蛇撞到边界或撞到自己。</p>
+            <p>尽量吃到更多食物以获得更高的分数！</p>
+        </div>
+        <a href="../index.html" class="button">返回目录</a>
     </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -198,6 +260,5 @@
 
         resetGame();
     </script>
-    <a href="../index.html" class="button">返回目录</a>
 </body>
 </html>
