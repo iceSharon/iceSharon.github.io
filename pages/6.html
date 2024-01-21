@@ -119,9 +119,9 @@
             <p>这是一个扫雷游戏，你的目标是揭示所有没有地雷的格子，而不触发地雷。</p>
             <p>按钮说明：</p>
             <ul>
-                <li>翻开模式：点击格子以揭示其内容。</li>
+                <li>翻开模式（标记模式）：点击格子以揭示其内容。</li>
                 <li>重新开始：重新开始游戏。</li>
-                <li>清除标记：清除所有标记在格子上的标记。</li>
+                <li>清除标记：(只在标记模式下生效)清除所有标记在格子上的标记。</li>
             </ul>
             <p>右键点击格子可以标记或取消标记格子。</p>
             <p>游戏结束时，点击“重新开始”按钮以重新开始游戏。</p>
@@ -251,7 +251,12 @@
             initializeBoard();
             renderBoard();
         }
-
+        function toggleFlag(row, col) {
+            if (!board[row][col].isRevealed) {
+                board[row][col].isFlagged = !board[row][col].isFlagged;
+                renderBoard();
+            }
+        }
         function renderBoard() {
             const minesweeper = document.querySelector('.minesweeper');
             minesweeper.innerHTML = '';
@@ -273,17 +278,18 @@
                             }
                         }
                     } else {
-                        if (board[row][col].isFlagged && !revealMode) {
+                        // 显示标记，即使在翻开模式下
+                        if (board[row][col].isFlagged) {
                             const flag = document.createElement('div');
                             flag.classList.add('flag');
                             cell.appendChild(flag);
                         }
-                        cell.addEventListener('click', () => revealCell(row, col));
-                        cell.addEventListener('contextmenu', (e) => {
-                            e.preventDefault();
-                            toggleFlag(row, col);
-                        });
                     }
+                    cell.addEventListener('click', () => revealCell(row, col));
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        toggleFlag(row, col);
+                    });
                     rowElement.appendChild(cell);
                 }
 
