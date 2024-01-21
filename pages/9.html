@@ -141,6 +141,12 @@
             }
         });
 
+        canvas.addEventListener('mousedown', () => {
+            if (canJump) {
+                bird.velocity = bird.lift;
+            }
+        });
+
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
