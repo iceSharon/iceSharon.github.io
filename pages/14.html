@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大球吃小球</title>
+    <style>
+        /* style.css */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            background-color: #caf0f8;
+            display: block;
+        }
+
+        #restartButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <button id="restartButton">再来一局</button>
+    <script>
+        // script.js
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const restartButton = document.getElementById('restartButton');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let fishes = [];
+            let playerFish;
+            let playerFishIndex;
+            let gameOver = false;
+            let gameInterval;
+
+            class Fish {
+                constructor(x, y, size, color = 'blue') {
+                    this.x = x;
+                    this.y = y;
+                    this.size = size;
+                    this.color = color;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * 2 - 1;
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+
+                    if (this === playerFish) {
+                        ctx.fillStyle = 'yellow'; // 用户鱼颜色
+                    } else if (playerFish.size > this.size) {
+                        ctx.fillStyle = 'green'; // 可以吃的鱼颜色
+                    } else {
+                        ctx.fillStyle = 'red'; // 不能吃的鱼颜色
+                    }
+
+                    ctx.fill();
+                }
+
+                update() {
+                    if (!gameOver) {
+                        this.x += this.speedX;
+                        this.y += this.speedY;
+
+                        // Boundary check
+                        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                    }
+                }
+
+                eat(fishIndex) {
+                    if (fishIndex === playerFishIndex) {
+                        gameOver = true;
+                        alert('你被吃掉了！游戏结束！');
+                        clearInterval(gameInterval);
+                    } else {
+                        fishes.splice(fishIndex, 1);
+                        this.size += 1;
+                    }
+                }
+            }
+
+            function createFishes() {
+                fishes = [];
+                // Randomize the number of small fishes between 400 and 500
+                const numSmallFish = Math.floor(Math.random() * (500 - 400 + 1)) + 400;
+                const numMediumFish = 5;
+
+                for (let i = 0; i < numSmallFish; i++) {
+                    const size = Math.random() * 10 + 5; // Randomize size
+                    fishes.push(new Fish(Math.random() * canvas.width, Math.random() * canvas.height, size));
+                }
+                for (let i = 0; i < numMediumFish; i++) {
+                    const size = Math.random() * 20 + 10; // Randomize size
+                    fishes.push(new Fish(Math.random() * canvas.width, Math.random() * canvas.height, size));
+                }
+
+                playerFish = new Fish(canvas.width / 2, canvas.height / 2, 15, 'yellow');
+                playerFishIndex = fishes.push(playerFish) - 1;
+
+                // 修改红鱼的大小
+                fishes.push(new Fish(Math.random() * canvas.width, Math.random() * canvas.height, 30, 'red'));
+                fishes.push(new Fish(Math.random() * canvas.width, Math.random() * canvas.height, 30, 'red'));
+            }
+
+            // 修改用户鱼的速度
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                playerFish.speedX = (mouseX - playerFish.x) * 0.02; // 减小速度系数
+                playerFish.speedY = (mouseY - playerFish.y) * 0.02; // 减小速度系数
+            });
+
+            // 添加胜利判断
+            function checkVictory() {
+                if (fishes.length === 1 && fishes[0] === playerFish) {
+                    gameOver = true;
+                    alert('恭喜你，你吃掉了所有其他鱼！胜利！');
+                    clearInterval(gameInterval);
+                }
+            }
+
+            // 修改 updateGame 函数
+            function updateGame() {
+                if (!gameOver) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    for (let i = 0; i < fishes.length; i++) {
+                        fishes[i].update();
+                        fishes[i].draw();
+
+                        // Check for collision
+                        for (let j = 0; j < fishes.length; j++) {
+                            if (i !== j && Math.hypot(fishes[i].x - fishes[j].x, fishes[i].y - fishes[j].y) < fishes[i].size + fishes[j].size) {
+                                if (fishes[i].size > fishes[j].size) {
+                                    fishes[i].eat(j);
+                                    if (i > j) i--;
+                                    if (playerFishIndex > j) playerFishIndex--;
+                                } else {
+                                    fishes[j].eat(i);
+                                    if (j > i) j--;
+                                    if (playerFishIndex > i) playerFishIndex--;
+                                }
+                            }
+                        }
+                    }
+
+                    checkVictory(); // 检查胜利条件
+                }
+            }
+
+            function animate() {
+                if (!gameOver) {
+                    updateGame();
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            function startGame() {
+                createFishes();
+                gameInterval = setInterval(updateGame, 20);
+                animate();
+            }
+
+            function resetGame() {
+                gameOver = false;
+                startGame();
+                restartButton.style.display = 'none';
+            }
+
+            // Show "3秒后开始游戏" and start the game with a 3-second delay
+            const startText = document.createElement('div');
+            startText.innerText = '3秒后开始游戏';
+            startText.style.position = 'absolute';
+            startText.style.top = '50%';
+            startText.style.left = '50%';
+            startText.style.transform = 'translate(-50%, -50%)';
+            document.body.appendChild(startText);
+
+            setTimeout(() => {
+                startText.style.display = 'none'; // Hide the countdown text
+                startGame(); // Start the game
+            }, 3000);
+
+            restartButton.addEventListener('click', () => {
+                resetGame();
+            });
+        });
+    </script>
+</body>
+</html>
