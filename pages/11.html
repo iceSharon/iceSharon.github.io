@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>井字棋游戏</title>
+    <style>
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            background-color: #eee;
+            cursor: pointer;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5e3e6;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            text-align: left;
+        }
+
+        li {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        a {
+            text-decoration: none;
+            color: #933c8a;
+        }
+
+        .color-area {
+            background-color: #f7c5db;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .color-area2 {
+            background-color: #afe1e7;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .color-area3 {
+            background-color: #f8e6a8;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        #restartButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            margin: 0 auto;
+            display: block;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #933c8a; /* 深紫色按钮背景 */
+            color: #fff; /* 白色按钮文本 */
+            border: none;
+            border-radius: 10px; /* 圆角矩形边框 */
+            text-decoration: none;
+            margin-top: 20px; /* 按钮上方留白 */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>井字棋游戏</h1>
+    <div class="board">
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+    </div>
+    <div class="status"></div>
+    <button id="restartButton" style="display: none;">再来一局</button>
+    <div class="color-area2">
+        <h1>井字棋游戏说明</h1>
+        <p>井字棋是一款经典的二人游戏，目标是在3x3的游戏棋盘上先完成一行、一列或一条对角线的连线，以自己的标记（“X”或“O”）为准。</p>
+
+        <p>游戏规则：</p>
+        <ul>
+            <li>1. 游戏开始时，玩家执“X”，电脑执“O”。玩家和电脑依次在空格内放置自己的标记。</li>
+            <li>2. 玩家首先点击游戏棋盘的一个空格来放置“X”，然后轮到电脑。轮到电脑时，它会考虑最佳位置来放置“O”。</li>
+            <li>3. 游戏继续轮流进行，直到有一方完成了一行、一列或一条对角线的连线，或者游戏棋盘填满了所有空格（平局）。</li>
+            <li>4. 如果玩家或电脑完成了连线，该玩家获胜并结束游戏。</li>
+            <li>5. 如果游戏棋盘填满而没有完成连线，则宣布平局。</li>
+            <li>6. 想再来一局？点击下方的“再来一局”按钮重新开始游戏。</li>
+        </ul>
+
+        <p>井字棋是一款简单而有趣的游戏，快来挑战自己或与电脑对战吧！</p>
+    </div>
+    <a href="../index.html" class="button">返回目录</a>
+</div>
+<script>
+    let cells;
+    let currentPlayer;
+    let gameOver;
+    let isUserTurn = true; // 添加一个变量来跟踪用户回合
+
+    document.addEventListener('DOMContentLoaded', () => {
+        cells = document.querySelectorAll('.cell');
+        currentPlayer = '×';
+        gameOver = false;
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+
+        function handleCellClick() {
+            if (!isUserTurn || gameOver || this.textContent !== '') return;
+
+            // 用户点击操作
+            this.textContent = currentPlayer;
+            this.classList.add(currentPlayer === '×' ? 'x' : 'o');
+
+            if (checkWin(currentPlayer)) {
+                gameOver = true;
+                showRestartButton();
+                setTimeout(() => {
+                    updateStatus(`${currentPlayer}赢了！`);
+                }, 500);
+                return;
+            }
+
+            if (checkTie()) {
+                gameOver = true;
+                showRestartButton();
+                setTimeout(() => {
+                    updateStatus('平局！');
+                }, 500);
+                return;
+            }
+
+            currentPlayer = currentPlayer === '×' ? '○' : '×';
+            if (currentPlayer === '○') {
+                updateStatus('电脑思考中...');
+                setTimeout(makeComputerMove, 500);
+            } else {
+                updateStatus('该你下了！');
+            }
+        }
+
+        function makeComputerMove() {
+            isUserTurn = false; // 电脑回合时禁用用户操作
+            const availableCells = Array.from(cells).filter(cell => cell.textContent === '');
+            if (availableCells.length === 0) return;
+
+            let bestScore = -Infinity;
+            let bestMove;
+
+            availableCells.forEach(cell => {
+                const index = Array.from(cells).indexOf(cell);
+                cell.textContent = currentPlayer;
+                const score = minimax(cells, 0, false);
+                cell.textContent = '';
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = cell;
+                }
+            });
+
+            bestMove.textContent = currentPlayer;
+            bestMove.classList.add(currentPlayer === '×' ? 'x' : 'o');
+
+            if (checkWin(currentPlayer)) {
+                gameOver = true;
+                showRestartButton();
+                setTimeout(() => {
+                    updateStatus(`${currentPlayer}赢了！`);
+                }, 500);
+                return;
+            }
+
+            if (checkTie()) {
+                gameOver = true;
+                showRestartButton();
+                setTimeout(() => {
+                    updateStatus('平局！');
+                }, 500);
+                return;
+            }
+
+            currentPlayer = currentPlayer === '×' ? '○' : '×';
+            updateStatus('该你下了！');
+            isUserTurn = true; // 用户回合
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            if (checkWin('×')) {
+                return -1;
+            } else if (checkWin('○')) {
+                return 1;
+            } else if (checkTie()) {
+                return 0;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                board.forEach(cell => {
+                    if (cell.textContent === '') {
+                        cell.textContent = '○';
+                        const score = minimax(board, depth + 1, false);
+                        cell.textContent = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                });
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                board.forEach(cell => {
+                    if (cell.textContent === '') {
+                        cell.textContent = '×';
+                        const score = minimax(board, depth + 1, true);
+                        cell.textContent = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                });
+                return bestScore;
+            }
+        }
+
+        function checkWin(player) {
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            return winningCombinations.some(combination => {
+                return combination.every(index => cells[index].textContent === player);
+            });
+        }
+
+        function checkTie() {
+            return Array.from(cells).every(cell => cell.textContent !== '');
+        }
+
+        function updateStatus(message) {
+            const status = document.querySelector('.status');
+            status.textContent = message;
+        }
+
+        const restartButton = document.getElementById('restartButton');
+        restartButton.addEventListener('click', restartGame);
+
+        function restartGame() {
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o');
+            });
+            currentPlayer = '×';
+            gameOver = false;
+            updateStatus('该你下了！');
+            restartButton.style.display = 'none';
+            isUserTurn = true; // 重新开始游戏时切换回用户回合
+        }
+
+        function showRestartButton() {
+            restartButton.style.display = 'block';
+        }
+
+        // 初始游戏状态下，允许用户进行第一步
+        updateStatus('该你下了！');
+        isUserTurn = true;
+
+    });
+</script>
+</body>
+</html>
