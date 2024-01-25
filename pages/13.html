@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Big Fish Eat Small Fish</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+        // 获取画布和上下文
+        var canvas = document.getElementById("gameCanvas");
+        var ctx = canvas.getContext("2d");
+
+        // 鱼类定义
+        class Fish {
+            constructor(x, y, radius, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.dx = Math.random() * 2 - 1;
+                this.dy = Math.random() * 2 - 1;
+            }
+
+            update() {
+                // 随机移动鱼的位置
+                this.x += this.dx;
+                this.y += this.dy;
+
+                // 限制鱼在画布内移动
+                if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) {
+                    this.dx *= -1;
+                }
+                if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+                    this.dy *= -1;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            eat(otherFish) {
+                if (this.radius > otherFish.radius) {
+                    // 当前鱼吃掉其他鱼并变大
+                    this.radius += otherFish.radius * 0.1;
+                    otherFish.radius = 0;
+                }
+            }
+        }
+
+        // 创建大鱼
+        var bigFish1 = new Fish(canvas.width / 2 - 100, canvas.height / 2, 50, "blue");
+        var bigFish2 = new Fish(canvas.width / 2 + 100, canvas.height / 2, 50, "blue");
+
+        // 创建小鱼
+        var smallFishes = [];
+        for (var i = 0; i < 20; i++) {
+            var x = Math.random() * canvas.width;
+            var y = Math.random() * canvas.height;
+            var radius = Math.random() * 10 + 5;
+            var color = "red";
+            var smallFish = new Fish(x, y, radius, color);
+            smallFishes.push(smallFish);
+        }
+
+        // 创建红色小鱼
+        var redFish = new Fish(canvas.width / 2, canvas.height / 2, 20, "red");
+
+        // 创建用户鱼
+        var userFish = new Fish(canvas.width / 2, canvas.height / 2, 30, "yellow");
+
+        // 鼠标移动事件处理
+        canvas.addEventListener("mousemove", function(event) {
+            var rect = canvas.getBoundingClientRect();
+            userFish.x = event.clientX - rect.left;
+            userFish.y = event.clientY - rect.top;
+        });
+
+        // 游戏循环
+        function gameLoop() {
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 更新大鱼1位置
+            bigFish1.update();
+
+            // 更新大鱼2位置
+            bigFish2.update();
+
+            // 更新小鱼位置并绘制
+            for (var i = 0; i < smallFishes.length; i++) {
+                var smallFish = smallFishes[i];
+                smallFish.update();
+                smallFish.draw();
+
+                // 检测大鱼1是否吃到小鱼
+                bigFish1.eat(smallFish);
+
+                // 检测大鱼2是否吃到小鱼
+                bigFish2.eat(smallFish);
+
+                // 检测用户鱼是否吃到小鱼
+                userFish.eat(smallFish);
+
+                // 移除已被吃掉的小鱼
+                if (smallFish.radius === 0) {
+                    smallFishes.splice(i, 1);
+                    i--;
+                }
+            }
+
+            // 更新用户鱼位置并绘制
+            userFish.update();
+            userFish.draw();
+
+            // 绘制大鱼1
+            bigFish1.draw();
+
+            // 绘制大鱼2
+            bigFish2.draw();
+
+            // 绘制红色小鱼
+            redFish.update();
+            redFish.draw();
+
+            // 循环调用游戏循环函数
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 启动游戏循环
+        gameLoop();
+    </script>
+</body>
+</html>
