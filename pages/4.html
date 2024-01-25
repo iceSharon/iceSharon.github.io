@@ -74,6 +74,7 @@
             background-color: #f7c5db; /* 浅紫色区域背景 */
             padding: 10px; /* 区域内边距 */
             margin-top: 20px; /* 区域上方留白 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 淡紫色阴影 */
         }
         .color-area2 {
             background-color: #afe1e7; /* 淡蓝色区域背景 */
@@ -95,6 +96,18 @@
             text-decoration: none;
             margin-top: 20px; /* 按钮上方留白 */
         }
+
+        #controlButtons {
+            display: flex;
+            justify-content: center; /* 水平居中对齐按钮 */
+        }
+
+        #upButton, #downButton, #leftButton, #rightButton {
+            padding: 10px 20px; /* 增加按钮的内边距 */
+            font-size: 24px; /* 增加按钮的文字大小 */
+            margin: 5px; /* 可选，按钮之间的间距 */
+        }
+
     </style>
 </head>
 <body>
@@ -105,15 +118,43 @@
         <div class="center">
             <button id="restartButton" onclick="resetGame()">重新开始</button>
         </div>
-        <div>
-            <h2>游戏说明</h2>
-            <p>使用方向键控制蛇的移动，吃到红色的食物来增加分数。</p>
-            <p>游戏结束条件：蛇撞到边界或撞到自己。</p>
-            <p>尽量吃到更多食物以获得更高的分数！</p>
+        <!-- 添加上下左右按钮的容器 -->
+        <div id="controlButtons">
+            <button id="leftButton">左</button>
+            <button id="upButton">上</button>
+            <button id="downButton">下</button>
+            <button id="rightButton">右</button>
         </div>
         <a href="../index.html" class="button">返回目录</a>
+        <div class="container">
+            <p><strong>游戏说明</strong>：使用方向键控制蛇的移动，吃到红色的食物来增加分数。游戏结束条件：蛇撞到边界或撞到自己。</p>
+        </div>
     </div>
     <script>
+        const upButton = document.getElementById('upButton');
+        const downButton = document.getElementById('downButton');
+        const leftButton = document.getElementById('leftButton');
+        const rightButton = document.getElementById('rightButton');
+
+        upButton.addEventListener('click', () => {
+            if (!gameRunning) return;
+            if (velocity.y === 0) velocity = { x: 0, y: -gridSize };
+        });
+
+        downButton.addEventListener('click', () => {
+            if (!gameRunning) return;
+            if (velocity.y === 0) velocity = { x: 0, y: gridSize };
+        });
+
+        leftButton.addEventListener('click', () => {
+            if (!gameRunning) return;
+            if (velocity.x === 0) velocity = { x: -gridSize, y: 0 };
+        });
+
+        rightButton.addEventListener('click', () => {
+            if (!gameRunning) return;
+            if (velocity.x === 0) velocity = { x: gridSize, y: 0 };
+        });
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
