@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>翻转记忆游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5e3e6; /* 浅粉色背景 */
+            margin: 0;
+            padding: 0;
+            text-align: center; /* 文本居中 */
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* 白色容器 */
+            border: 1px solid #dcdcdc; /* 淡紫色边框 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 淡紫色阴影 */
+        }
+        #game-board {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            width: 121px;
+            height: 192px;
+            background-color: #ccc;
+            border: 1px solid #a3a4a7;
+            display: inline-block;
+            margin: 10px;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+        }
+        #restart-button {
+            display: none;
+            margin-top: 20px;
+        }
+        .centered {
+            display: flex;
+            justify-content: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #933c8a; /* 深紫色按钮背景 */
+            color: #fff; /* 白色按钮文本 */
+            border: none;
+            border-radius: 10px; /* 圆角矩形边框 */
+            text-decoration: none;
+            margin-top: 20px; /* 按钮上方留白 */
+        }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <h1>翻转记忆游戏</h1>
+        <div id="game-board">
+            <div class="card" onclick="flipCard(0)"></div>
+            <div class="card" onclick="flipCard(1)"></div>
+            <div class="card" onclick="flipCard(2)"></div>
+            <div class="card" onclick="flipCard(3)"></div>
+        </div>
+        <div id="game-board">
+            <div class="card" onclick="flipCard(4)"></div>
+            <div class="card" onclick="flipCard(5)"></div>
+            <div class="card" onclick="flipCard(6)"></div>
+            <div class="card" onclick="flipCard(7)"></div>
+        </div>
+        <div id="restart-button" class="centered">
+            <button onclick="restartGame()">再来一局</button>
+        </div>
+        <p id="steps">步数: 0</p>
+        <a href="../index.html" class="button">返回目录</a>
+    </div>
+  <script>
+    var cards = [
+      { id: 0, img: "img-12/1.png" },
+      { id: 0, img: "img-12/1.png" },
+      { id: 1, img: "img-12/2.png" },
+      { id: 1, img: "img-12/2.png" },
+      { id: 2, img: "img-12/3.png" },
+      { id: 2, img: "img-12/3.png" },
+      { id: 3, img: "img-12/4.png" },
+      { id: 3, img: "img-12/4.png" }
+    ];
+
+    var flippedCards = [];
+    var matchedCards = [];
+    var steps = 0;
+
+    // 洗牌函数
+    function shuffle(array) {
+      var currentIndex = array.length;
+      var temporaryValue, randomIndex;
+
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    }
+
+    // 洗牌卡牌
+    cards = shuffle(cards);
+
+    function flipCard(cardId) {
+      var card = cards[cardId];
+      var cardElement = document.getElementsByClassName("card")[cardId];
+
+      if (flippedCards.length < 2 && !cardElement.classList.contains("flipped") && !matchedCards.includes(cardId)) {
+        cardElement.style.backgroundImage = "url('" + card.img + "')";
+        cardElement.classList.add("flipped");
+        flippedCards.push({ id: card.id, element: cardElement, cardId: cardId });
+        if (flippedCards.length === 2) {
+            setTimeout(checkMatch, 1000);
+            steps++; // 在检查匹配后增加步数
+            document.getElementById("steps").textContent = "步数: " + steps;
+        }
+        document.getElementById("steps").textContent = "步数: " + steps;
+      }
+    }
+
+    function checkMatch() {
+      if (flippedCards[0].id === flippedCards[1].id) {
+        alert("匹配成功！");
+        removeMatchedCards();
+        matchedCards.push(flippedCards[0].cardId, flippedCards[1].cardId);
+        checkWin();
+      } else {
+        var cardElements = document.getElementsByClassName("card");
+        for (var i = 0; i < cardElements.length; i++) {
+          if (cardElements[i].classList.contains("flipped")) {
+            cardElements[i].style.backgroundImage = "";
+            cardElements[i].classList.remove("flipped");
+          }
+        }
+      }
+      resetCards();
+    }
+
+    function removeMatchedCards() {
+      flippedCards.forEach(function(card) {
+        card.element.style.visibility = "hidden";
+      });
+    }
+
+    function resetCards() {
+      flippedCards = [];
+    }
+
+    function checkWin() {
+      if (matchedCards.length === cards.length) {
+        alert("胜利！你共用了 " + steps + " 步。");
+        showRestartButton();
+      }
+    }
+
+    function showRestartButton() {
+      var restartButton = document.getElementById("restart-button");
+      restartButton.style.display = "flex";
+    }
+
+    function restartGame() {
+      var cardElements = document.getElementsByClassName("card");
+      for (var i = 0; i < cardElements.length; i++) {
+        cardElements[i].style.visibility = "visible";
+        cardElements[i].style.backgroundImage = "";
+        cardElements[i].classList.remove("flipped");
+      }
+      matchedCards = [];
+      flippedCards = [];
+      hideRestartButton();
+      cards = shuffle(cards);
+      steps = 0; // 重置步数
+    document.getElementById("steps").textContent = "步数: " + steps; // 更新步数显示
+    }
+
+    function hideRestartButton() {
+      var restartButton = document.getElementById("restart-button");
+      restartButton.style.display = "none";
+    }
+  </script>
+</body>
+</html>
