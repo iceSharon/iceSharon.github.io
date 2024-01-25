@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>成语接龙</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5e3e6; /* 浅粉色背景 */
+            margin: 0;
+            padding: 0;
+            text-align: center; /* 文本居中 */
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* 白色容器 */
+            border: 1px solid #dcdcdc; /* 淡紫色边框 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 淡紫色阴影 */
+        }
+        h1 {
+            text-align: center;
+        }
+        #game-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #prompt {
+            margin-bottom: 10px;
+        }
+        #user-input {
+            width: 100%;
+            padding: 5px;
+            font-size: 16px;
+            }
+        #output {
+            margin-top: 10px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #933c8a; /* 深紫色按钮背景 */
+            color: #fff; /* 白色按钮文本 */
+            border: none;
+            border-radius: 10px; /* 圆角矩形边框 */
+            text-decoration: none;
+            margin-top: 20px; /* 按钮上方留白 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="game-container">
+            <h1>成语接龙</h1>
+            <div id="prompt">电脑已选择一个成语：<span id="computer-idiom"></span>，请以该成语的末尾字输入一个成语：</div>
+            <input type="text" id="user-input" autofocus>
+            <div id="output"></div>
+        </div>
+        <a href="../index.html" class="button">返回目录</a>
+    </div>
+  <script>
+    // 加载成语列表
+    var idioms = [];
+
+    function loadIdioms() {
+      fetch("成语大全.txt")
+        .then(response => response.text())
+        .then(data => {
+          idioms = data.split("\n").filter(idiom => idiom.trim() !== "");
+          startGame();
+        })
+        .catch(error => {
+          console.error("无法加载成语列表:", error);
+        });
+    }
+
+    // 游戏逻辑
+    var lastChar = "";
+
+    function startGame() {
+      // 随机选择一个成语作为电脑的起始成语
+      var randomIndex = Math.floor(Math.random() * idioms.length);
+      var computerIdiom = idioms[randomIndex];
+      lastChar = computerIdiom.charAt(computerIdiom.length - 1);
+
+      // 显示起始成语
+      document.getElementById("computer-idiom").textContent = computerIdiom;
+      displayOutput("电脑：" + computerIdiom);
+
+      // 监听用户输入
+      var userInput = document.getElementById("user-input");
+      userInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          processUserInput(userInput.value.trim());
+          userInput.value = "";
+        }
+      });
+    }
+
+    function processUserInput(userInput) {
+      if (userInput.length === 0) {
+        return;
+      }
+
+      var firstCharOfUserInput = userInput.charAt(0);
+      if (firstCharOfUserInput !== lastChar) {
+        displayOutput("请以 \"" + lastChar + "\" 开头输入一个成语！");
+        return;
+      }
+
+      if (!idioms.includes(userInput)) {
+        displayOutput("抱歉，该成语不符合规则或不存在！");
+        return;
+      }
+
+      lastChar = userInput.charAt(userInput.length - 1);
+      displayOutput("用户：" + userInput);
+
+      // 电脑回答
+      var computerResponse = getComputerResponse(lastChar);
+      if (computerResponse === null) {
+        displayOutput("电脑：我无话可说，你赢了！");
+        return;
+      }
+
+      lastChar = computerResponse.charAt(computerResponse.length - 1);
+      displayOutput("电脑：" + computerResponse);
+      document.getElementById("computer-idiom").textContent = computerResponse;
+    }
+
+    function getComputerResponse(firstChar) {
+      var possibleIdioms = idioms.filter(idiom => idiom.charAt(0) === firstChar);
+      if (possibleIdioms.length === 0) {
+        return null;
+      }
+
+      var randomIndex = Math.floor(Math.random() * possibleIdioms.length);
+      return possibleIdioms[randomIndex];
+    }
+
+    function displayOutput(message) {
+      var output = document.getElementById("output");
+      output.innerHTML += "<p>" + message + "</p>";
+      output.scrollTop = output.scrollHeight;
+    }
+
+    // 开始游戏
+    loadIdioms();
+  </script>
+</body>
+</html>
